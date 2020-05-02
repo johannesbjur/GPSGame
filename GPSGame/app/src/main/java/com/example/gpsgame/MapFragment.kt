@@ -1,21 +1,26 @@
 package com.example.gpsgame
 
+import android.app.Activity
+import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
+import com.example.navigationgame.PlaceItem
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -41,14 +46,52 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
     }
 
+    val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireActivity())
-        
+
         return inflater.inflate(R.layout.fragment_map, container, false)
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(p0: LocationResult) {
+                super.onLocationResult(p0)
+
+                lastLocation = p0.lastLocation
+
+                Log.d("loccallback", lastLocation.latitude.toString() + " " + lastLocation.longitude.toString())
+
+                val distance = FloatArray(2)
+                Location.distanceBetween(
+                    lastLocation.latitude,
+                    lastLocation.longitude,
+                    item.latitude,
+                    item.longitude,
+                    distance )
+
+                Log.d("callback: ", distance[0].toString())
+
+
+                if ( distance[0] <= item.radius ) {
+                    Log.d("callback", "In circle")
+                    item.complete()
+                }
+                else {
+                    Log.d("callback", "Not in circle")
+                }
+            }
+        }
+
+        createLocationRequest()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -76,6 +119,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         setUpMap()
     }
 
+    override fun onMarkerClick(p0: Marker?) = false
 
     private fun setUpMap() {
         if (ActivityCompat.checkSelfPermission(this.requireActivity(),
@@ -94,11 +138,100 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
             if (location != null) {
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+
+
+                val latlong = LatLng(item.latitude, item.longitude)
+                val circle = googleMap.addCircle(
+                    CircleOptions()
+                        .center(latlong)
+                        .radius(item.radius)
+                        .strokeColor(Color.parseColor("#33FFF3"))
+                        .fillColor(Color.parseColor("#4933FFF3"))
+                )
+                item.circle = circle
+
             }
         }
     }
 
-    override fun onMarkerClick(p0: Marker?) = false
+    private fun startLocationUpdates() {
+        //1
+        if (ActivityCompat.checkSelfPermission(this.requireActivity(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this.requireActivity(),
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE)
+            return
+        }
+        //2
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null /* Looper */)
+    }
+
+    private fun createLocationRequest() {
+        // 1
+        locationRequest = LocationRequest()
+        // 2
+        locationRequest.interval = 10000
+        // 3
+        locationRequest.fastestInterval = 500
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+
+        // 4
+        val client = LocationServices.getSettingsClient(this.requireActivity())
+        val task = client.checkLocationSettings(builder.build())
+
+        // 5
+        task.addOnSuccessListener {
+            locationUpdateState = true
+            startLocationUpdates()
+        }
+        task.addOnFailureListener { e ->
+            // 6
+            if (e is ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    e.startResolutionForResult(this.requireActivity(),
+                        REQUEST_CHECK_SETTINGS)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
+        }
+    }
+
+    // 1
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
+                locationUpdateState = true
+                startLocationUpdates()
+            }
+        }
+    }
+
+    // 2
+    override fun onPause() {
+        super.onPause()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    // 3
+    public override fun onResume() {
+        super.onResume()
+        if (!locationUpdateState) {
+            startLocationUpdates()
+        }
+    }
+
+
+
 
 }
