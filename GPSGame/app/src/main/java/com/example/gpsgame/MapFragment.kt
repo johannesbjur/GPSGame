@@ -33,6 +33,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var lastLocation: Location
 
+    lateinit var activity: MainActivity
+    var placeItems = mutableListOf<PlaceItem>()
+
     // 1
     private lateinit var locationCallback: LocationCallback
     // 2
@@ -71,22 +74,26 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                 Log.d("loccallback", lastLocation.latitude.toString() + " " + lastLocation.longitude.toString())
 
                 val distance = FloatArray(2)
-                Location.distanceBetween(
-                    lastLocation.latitude,
-                    lastLocation.longitude,
-                    item.latitude,
-                    item.longitude,
-                    distance )
 
-                Log.d("callback: ", distance[0].toString())
+                for( item in placeItems ) {
+
+                    Location.distanceBetween(
+                        lastLocation.latitude,
+                        lastLocation.longitude,
+                        item.latitude,
+                        item.longitude,
+                        distance )
+
+                    Log.d("loccallback: ", distance[0].toString())
 
 
-                if ( distance[0] <= item.radius ) {
-                    Log.d("callback", "In circle")
-                    item.complete()
-                }
-                else {
-                    Log.d("callback", "Not in circle")
+                    if ( distance[0] <= item.radius ) {
+                        Log.d("loccallback", "In circle")
+                        item.complete()
+                    }
+                    else {
+                        Log.d("loccallback", "Not in circle")
+                    }
                 }
             }
         }
@@ -101,6 +108,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         mapView.onResume()
         mapView.getMapAsync(this)
 
+        activity = context as MainActivity
+
+        placeItems = activity.placeItems
     }
 
     override fun onMapReady(map: GoogleMap) {
@@ -141,15 +151,19 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
 
 
-                val latlong = LatLng(item.latitude, item.longitude)
-                val circle = googleMap.addCircle(
-                    CircleOptions()
-                        .center(latlong)
-                        .radius(item.radius)
-                        .strokeColor(Color.parseColor("#33FFF3"))
-                        .fillColor(Color.parseColor("#4933FFF3"))
-                )
-                item.circle = circle
+                for ( item in placeItems ) {
+
+                    val latlong = LatLng(item.latitude, item.longitude)
+                    val circle = googleMap.addCircle(
+                        CircleOptions()
+                            .center(latlong)
+                            .radius(item.radius)
+                            .strokeColor(Color.parseColor("#33FFF3"))
+                            .fillColor(Color.parseColor("#4933FFF3"))
+                    )
+
+                    item.circle = circle
+                }
 
             }
         }
