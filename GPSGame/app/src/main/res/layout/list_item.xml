@@ -13,7 +13,7 @@
         android:layout_marginEnd="30dp"
         android:layout_marginBottom="8dp"
         app:cardCornerRadius="10dp"
-        app:cardElevation="1dp"
+        app:cardElevation="4dp"
         app:cardUseCompatPadding="true"
         app:contentPadding="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -28,7 +28,7 @@
             <ImageView
                 android:id="@+id/imageView"
                 android:layout_width="100dp"
-                android:layout_height="95dp"
+                android:layout_height="94dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
