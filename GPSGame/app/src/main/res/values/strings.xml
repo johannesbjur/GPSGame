@@ -5,6 +5,9 @@
     <string name="title_list">List</string>
     <string name="title_profile">Profile</string>
 
+    <string name="list_active_title">Active</string>
+
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
