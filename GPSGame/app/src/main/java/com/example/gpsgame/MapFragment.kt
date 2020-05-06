@@ -8,22 +8,20 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import com.example.navigationgame.PlaceItem
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_map.*
 
 
@@ -123,7 +121,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         }
 
 
-        map.getUiSettings().setZoomControlsEnabled(true)
+        map.getUiSettings().setZoomControlsEnabled(false)
         map.setOnMarkerClickListener(this)
 
         setUpMap()
@@ -149,6 +147,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+
+
+//              Add map tilt
+//                val cameraPosition: CameraPosition =
+//                    CameraPosition.Builder().target(currentLatLng).tilt(30F).zoom(15F).bearing(0F).build()
+//                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
 
                 for ( item in placeItems ) {
