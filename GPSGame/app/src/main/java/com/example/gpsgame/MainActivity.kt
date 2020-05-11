@@ -1,19 +1,22 @@
 package com.example.gpsgame
 
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.example.navigationgame.PlaceItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 class MainActivity : AppCompatActivity() {
 
 
     var placeItems = mutableListOf<PlaceItem>()
+
+    var db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,5 +35,22 @@ class MainActivity : AppCompatActivity() {
         val item2 = PlaceItem( "Tantolunden", 59.312975, 18.049348 )
         placeItems.add(item)
         placeItems.add(item2)
+
+//
+//        val user: MutableMap<String, Any> = HashMap()
+//        user["first"] = "Ada"
+//        user["last"] = "Lovelace"
+//        user["born"] = 1815
+//
+//        db.collection("users")
+//            .add(user)
+//            .addOnSuccessListener { documentReference ->
+//                Log.d(
+//                    "DB Callback: ",
+//                    "DocumentSnapshot added with ID: " + documentReference.id
+//                )
+//            }
+//            .addOnFailureListener { e -> Log.w("DB Callback: ", "Error adding document", e) }
+
     }
 }
