@@ -166,14 +166,15 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
 
 //                get place items from db and add circles
-//                TODO change to on change listener ? 
-                docRef.get().addOnSuccessListener { result ->
+//                doesnt change on remove
+//                TODO change to on change listener ?
+                docRef.addSnapshotListener { querySnapshot, e ->
 
-                    placeItems.clear()
+                    if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 
-                    if ( result.documents.size > 0 ) {
+                        placeItems.clear()
 
-                        for ( doc in result.documents ) {
+                        for ( doc in querySnapshot.documents ) {
                             var item = PlaceItem(
                                 doc["name"].toString(),
                                 doc["latitude"] as Double,
