@@ -1,6 +1,7 @@
 package com.example.navigationgame
 
 import com.google.android.gms.maps.model.Circle
+import com.google.firebase.firestore.DocumentSnapshot
 import java.util.*
 
 
@@ -8,7 +9,7 @@ class PlaceItem(val name: String, val latitude: Double, val longitude: Double, v
 
     val points: Int
     var circle: Circle? = null
-    var created = Date()
+    var created = Date().toString()
 
     init {
 

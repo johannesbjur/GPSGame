@@ -22,6 +22,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_map.*
 
 
@@ -30,6 +32,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var lastLocation: Location
+
+    var db = FirebaseFirestore.getInstance()
+    private lateinit var auth: FirebaseAuth
 
     lateinit var activity: MainActivity
     var placeItems = mutableListOf<PlaceItem>()
@@ -55,6 +60,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     ): View? {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireActivity())
+        auth = FirebaseAuth.getInstance()
 
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
@@ -154,21 +160,40 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 //                    CameraPosition.Builder().target(currentLatLng).tilt(30F).zoom(15F).bearing(0F).build()
 //                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
+                var docRef = db.collection("users")
+                    .document(auth.currentUser?.uid.toString())
+                    .collection("active")
 
-                for ( item in placeItems ) {
 
-                    val latlong = LatLng(item.latitude, item.longitude)
-                    val circle = googleMap.addCircle(
-                        CircleOptions()
-                            .center(latlong)
-                            .radius(item.radius)
-                            .strokeColor(Color.parseColor("#33FFF3"))
-                            .fillColor(Color.parseColor("#4933FFF3"))
-                    )
+//                get place items from db and add circles
+//                TODO change to on change listener ? 
+                docRef.get().addOnSuccessListener { result ->
 
-                    item.circle = circle
+                    placeItems.clear()
+
+                    if ( result.documents.size > 0 ) {
+
+                        for ( doc in result.documents ) {
+                            var item = PlaceItem(
+                                doc["name"].toString(),
+                                doc["latitude"] as Double,
+                                doc["longitude"] as Double
+                            )
+                            val latlong = LatLng(item.latitude, item.longitude)
+                            val circle = googleMap.addCircle(
+                                CircleOptions()
+                                    .center(latlong)
+                                    .radius(item.radius)
+                                    .strokeColor(Color.parseColor("#33FFF3"))
+                                    .fillColor(Color.parseColor("#4933FFF3"))
+                            )
+
+                            item.circle = circle
+                            placeItems.add(item)
+                        }
+                    }
+
                 }
-
             }
         }
     }
