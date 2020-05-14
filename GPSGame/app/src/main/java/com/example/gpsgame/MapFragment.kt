@@ -22,6 +22,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_map.*
 
 
@@ -30,6 +32,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var lastLocation: Location
+
+    var db = FirebaseFirestore.getInstance()
+    private lateinit var auth: FirebaseAuth
 
     lateinit var activity: MainActivity
     var placeItems = mutableListOf<PlaceItem>()
@@ -47,14 +52,13 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
     }
 
-    val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireActivity())
+        auth = FirebaseAuth.getInstance()
 
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
@@ -84,10 +88,19 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
                     Log.d("loccallback: ", distance[0].toString())
 
+                    Log.d("loccallback: ", item.id)
+
 
                     if ( distance[0] <= item.radius ) {
                         Log.d("loccallback", "In circle")
                         item.complete()
+                        placeItems.remove(item)
+                        Log.d("loccallback", item.id)
+                        db.collection("users")
+                            .document(auth.currentUser?.uid.toString())
+                            .collection("placeItems")
+                            .document(item.id)
+                            .set(item)
                     }
                     else {
                         Log.d("loccallback", "Not in circle")
@@ -154,21 +167,48 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 //                    CameraPosition.Builder().target(currentLatLng).tilt(30F).zoom(15F).bearing(0F).build()
 //                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
+                var docRef = db.collection("users")
+                                                .document(auth.currentUser?.uid.toString())
+                                                .collection("placeItems")
 
-                for ( item in placeItems ) {
 
-                    val latlong = LatLng(item.latitude, item.longitude)
-                    val circle = googleMap.addCircle(
-                        CircleOptions()
-                            .center(latlong)
-                            .radius(item.radius)
-                            .strokeColor(Color.parseColor("#33FFF3"))
-                            .fillColor(Color.parseColor("#4933FFF3"))
-                    )
+//                get place items from db and add circles
+//                doesnt change on remove
+                docRef.addSnapshotListener { querySnapshot, e ->
 
-                    item.circle = circle
+                    if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
+
+//                        Remove all circles from map and clear placeItems array
+                        for ( item in placeItems ) item.complete()
+                        placeItems.clear()
+
+                        for ( doc in querySnapshot.documents ) {
+
+                            if ( doc["active"] as Boolean ) {
+
+                                var item = PlaceItem(
+                                    doc["name"].toString(),
+                                    doc["latitude"] as Double,
+                                    doc["longitude"] as Double,
+                                    doc.id
+                                )
+                                val latlong = LatLng(item.latitude, item.longitude)
+                                val circle = googleMap.addCircle(
+                                    CircleOptions()
+                                        .center(latlong)
+                                        .radius(item.radius)
+                                        .strokeColor(Color.parseColor("#33FFF3"))
+                                        .fillColor(Color.parseColor("#4933FFF3"))
+                                )
+
+                                item.circle = circle
+                                placeItems.add(item)
+                            }
+
+                        }
+                    }
+
                 }
-
             }
         }
     }
@@ -192,7 +232,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         // 2
         locationRequest.interval = 10000
         // 3
-        locationRequest.fastestInterval = 500
+        locationRequest.fastestInterval = 800
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         val builder = LocationSettingsRequest.Builder()
