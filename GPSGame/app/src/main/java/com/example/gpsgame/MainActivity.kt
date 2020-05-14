@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     var db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
 
+    var user_full_name = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -87,20 +89,29 @@ class MainActivity : AppCompatActivity() {
                     val data: MutableMap<String, Any> = HashMap()
 
 //                    Set user data
-//                    move somewhere else
+//                    TODO move somewhere else, create user input
 //                    data["first"] = "Johannes"
 //                    data["last"] = "Bjurstromer"
-//                    db.collection("users")
-//                        .document(auth.currentUser?.uid.toString())
-//                        .set(data)
+//                    db.collection( "users" )
+//                        .document( auth.currentUser?.uid.toString() )
+//                        .set( data )
 
+
+//                    Get user first and last name from db
+                    db.collection( "users" )
+                        .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
+
+                            if ( result.data?.get("first") != null &&  result.data?.get("last") != null ) {
+
+                                user_full_name = result.data?.get("first").toString() + " " + result.data?.get("last").toString()
+                            }
+                        }
+
+//                    get user location and create place items with location
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
 
                         setupActive( location )
-
                     }
-
-
 
                 } else {
                     // If sign in fails, display a message to the user.
@@ -120,7 +131,6 @@ class MainActivity : AppCompatActivity() {
 
         docRef.get().addOnSuccessListener { result ->
 
-
             if (result.documents.size > 0) {
 
                 var firstActive = result.documents[0]
@@ -133,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                 if (compareDate?.time > nowDate?.time - 86400000 || true) return@addOnSuccessListener
             }
 
-//                Clear active collection in database
+//                Clear placeItems collection in database
             for ((index, document) in result.documents.withIndex()) {
 
                 docRef.document(result.documents[index].id).delete()
