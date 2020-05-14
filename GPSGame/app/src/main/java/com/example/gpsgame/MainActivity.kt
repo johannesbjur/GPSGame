@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         var docRef = db.collection("users")
             .document(auth.currentUser?.uid.toString())
-            .collection("active")
+            .collection("placeItems")
 
         docRef.get().addOnSuccessListener { result ->
 
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                 if (compareDate?.time > nowDate?.time - 86400000 || true) return@addOnSuccessListener
             }
 
-//                Clear acitve collection in database
+//                Clear active collection in database
             for ((index, document) in result.documents.withIndex()) {
 
                 docRef.document(result.documents[index].id).delete()
@@ -150,6 +150,10 @@ class MainActivity : AppCompatActivity() {
 
                 docRef.add(item)
             }
+
+//            val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
+//            docRef.add(item)
+
         }
     }
 

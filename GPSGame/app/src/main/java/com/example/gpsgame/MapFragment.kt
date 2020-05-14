@@ -52,8 +52,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
     }
 
-    val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -90,10 +88,19 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
                     Log.d("loccallback: ", distance[0].toString())
 
+                    Log.d("loccallback: ", item.id)
+
 
                     if ( distance[0] <= item.radius ) {
                         Log.d("loccallback", "In circle")
                         item.complete()
+                        placeItems.remove(item)
+                        Log.d("loccallback", item.id)
+                        db.collection("users")
+                            .document(auth.currentUser?.uid.toString())
+                            .collection("placeItems")
+                            .document(item.id)
+                            .set(item)
                     }
                     else {
                         Log.d("loccallback", "Not in circle")
@@ -161,36 +168,43 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 //                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
                 var docRef = db.collection("users")
-                    .document(auth.currentUser?.uid.toString())
-                    .collection("active")
+                                                .document(auth.currentUser?.uid.toString())
+                                                .collection("placeItems")
 
 
 //                get place items from db and add circles
 //                doesnt change on remove
-//                TODO change to on change listener ?
                 docRef.addSnapshotListener { querySnapshot, e ->
 
                     if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 
+//                        Remove all circles from map and clear placeItems array
+                        for ( item in placeItems ) item.complete()
                         placeItems.clear()
 
                         for ( doc in querySnapshot.documents ) {
-                            var item = PlaceItem(
-                                doc["name"].toString(),
-                                doc["latitude"] as Double,
-                                doc["longitude"] as Double
-                            )
-                            val latlong = LatLng(item.latitude, item.longitude)
-                            val circle = googleMap.addCircle(
-                                CircleOptions()
-                                    .center(latlong)
-                                    .radius(item.radius)
-                                    .strokeColor(Color.parseColor("#33FFF3"))
-                                    .fillColor(Color.parseColor("#4933FFF3"))
-                            )
 
-                            item.circle = circle
-                            placeItems.add(item)
+                            if ( doc["active"] as Boolean ) {
+
+                                var item = PlaceItem(
+                                    doc["name"].toString(),
+                                    doc["latitude"] as Double,
+                                    doc["longitude"] as Double,
+                                    doc.id
+                                )
+                                val latlong = LatLng(item.latitude, item.longitude)
+                                val circle = googleMap.addCircle(
+                                    CircleOptions()
+                                        .center(latlong)
+                                        .radius(item.radius)
+                                        .strokeColor(Color.parseColor("#33FFF3"))
+                                        .fillColor(Color.parseColor("#4933FFF3"))
+                                )
+
+                                item.circle = circle
+                                placeItems.add(item)
+                            }
+
                         }
                     }
 
@@ -218,7 +232,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         // 2
         locationRequest.interval = 10000
         // 3
-        locationRequest.fastestInterval = 500
+        locationRequest.fastestInterval = 800
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         val builder = LocationSettingsRequest.Builder()
