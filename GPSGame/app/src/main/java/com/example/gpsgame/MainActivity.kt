@@ -46,36 +46,12 @@ class MainActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-//        val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
-//        val item2 = PlaceItem( "Tantolunden", 59.312975, 18.049348 )
-//        placeItems.add(item)
-//        placeItems.add(item2)
-
-//        Log.d("date", item.created.toString())
-//
-//        val user: MutableMap<String, Any> = HashMap()
-//        user["first"] = "Ada"
-//        user["last"] = "Lovelace"
-//        user["born"] = 1815
-//
-//        db.collection("users")
-//            .add(user)
-//            .addOnSuccessListener { documentReference ->
-//                Log.d(
-//                    "DB Callback: ",
-//                    "DocumentSnapshot added with ID: " + documentReference.id
-//                )
-//            }
-//            .addOnFailureListener { e -> Log.w("DB Callback: ", "Error adding document", e) }
-
     }
 
     override fun onStart() {
         super.onStart()
 
         val currentUser = auth.currentUser
-
 
         auth.signInAnonymously()
             .addOnCompleteListener(this) { task ->
@@ -131,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
         docRef.get().addOnSuccessListener { result ->
 
-            if (result.documents.size > 0) {
+            if ( result.documents.size > 0 ) {
 
                 var firstActive = result.documents[0]
 
@@ -140,17 +116,20 @@ class MainActivity : AppCompatActivity() {
                 val compareDate = Date(firstActive.data?.get("created").toString())
                 val nowDate = Date()
 
-                if (compareDate?.time > nowDate?.time - 86400000 || true) return@addOnSuccessListener
+                if ( compareDate?.time > nowDate?.time - 86400000  ) return@addOnSuccessListener
             }
 
 //                Clear placeItems collection in database
             for ((index, document) in result.documents.withIndex()) {
 
-                docRef.document(result.documents[index].id).delete()
+//                docRef.document(result.documents[index].id).delete()
+                docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
+
             }
 
             for (i in 0..1) {
 
+//                Create coordinates in close range of user location
                 var lat = Random.nextDouble(location.latitude - 0.01, location.latitude + 0.01)
                 var long = Random.nextDouble(location.longitude - 0.01, location.longitude + 0.01)
                 lat = Math.round(lat * 1000000.0) / 1000000.0
