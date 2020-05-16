@@ -26,15 +26,7 @@ class ProfileFragment : Fragment() {
         activity = context as MainActivity
         auth = FirebaseAuth.getInstance()
 
-        var docRef = db.collection("users")
-                                        .document(auth.currentUser?.uid.toString())
-                                        .collection("placeItems")
 
-        docRef.whereEqualTo( "completed", true ).get().addOnSuccessListener { result ->
-
-            Log.d("profilefrag", result.documents.size.toString())
-
-        }
 
     }
 
@@ -42,6 +34,16 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        var docRef = db.collection("users")
+            .document(auth.currentUser?.uid.toString())
+            .collection("placeItems")
+
+//        Fade in text view?
+        docRef.whereEqualTo( "completed", true ).get().addOnSuccessListener { result ->
+
+            viewOfLayout.stars_text.text = result.documents.size.toString()
+        }
 
         viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
         viewOfLayout.user_full_name.text = activity.user_full_name
