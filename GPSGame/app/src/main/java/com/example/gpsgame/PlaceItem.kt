@@ -11,6 +11,7 @@ class PlaceItem(val name: String, val latitude: Double, val longitude: Double, @
     @get:Exclude var circle: Circle? = null
     var created = Date().toString()
     var isActive: Boolean = true
+    var isCompleted: Boolean = false
 
     init {
 
@@ -22,6 +23,7 @@ class PlaceItem(val name: String, val latitude: Double, val longitude: Double, @
         // Null check?
         circle?.remove()
         isActive = false
+        isCompleted = true
     }
 
 

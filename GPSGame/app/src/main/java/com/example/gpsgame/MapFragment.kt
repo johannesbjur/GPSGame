@@ -86,16 +86,17 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                         item.longitude,
                         distance )
 
-                    Log.d("loccallback: ", distance[0].toString())
-
-                    Log.d("loccallback: ", item.id)
-
+//                    Log.d("loccallback: ", distance[0].toString())
+//                    Log.d("loccallback: ", item.id)
 
                     if ( distance[0] <= item.radius ) {
-                        Log.d("loccallback", "In circle")
+
                         item.complete()
                         placeItems.remove(item)
-                        Log.d("loccallback", item.id)
+
+//                        Log.d("loccallback", "In circle")
+//                        Log.d("loccallback", item.id)
+
                         db.collection("users")
                             .document(auth.currentUser?.uid.toString())
                             .collection("placeItems")
@@ -132,7 +133,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         map.let {
             googleMap = it
         }
-
 
         map.getUiSettings().setZoomControlsEnabled(false)
         map.setOnMarkerClickListener(this)
@@ -184,7 +184,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
                         for ( doc in querySnapshot.documents ) {
 
-                            if ( doc["active"] as Boolean ) {
+                            if ( doc["active"] as Boolean && !(doc["completed"] as Boolean) ) {
 
                                 var item = PlaceItem(
                                     doc["name"].toString(),
