@@ -12,8 +12,8 @@ import com.example.navigationgame.PlaceItem
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
 import kotlin.collections.HashMap
@@ -77,10 +77,11 @@ class MainActivity : AppCompatActivity() {
                     db.collection( "users" )
                         .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
 
-                            if ( result.data?.get("first") != null &&  result.data?.get("last") != null ) {
+                            user_full_name = if ( result.data?.get("first") != null &&  result.data?.get("last") != null ) {
 
-                                user_full_name = result.data?.get("first").toString() + " " + result.data?.get("last").toString()
-                            }
+                                result.data?.get("first").toString() + " " + result.data?.get("last").toString()
+                            } else "Guest"
+
                         }
 
 //                    get user location and create place items with location
@@ -89,14 +90,20 @@ class MainActivity : AppCompatActivity() {
                         setupActive( location )
                     }
 
+//                    TODO create completed this week progression circle
+//                    db.collection("users").document(auth.currentUser?.uid.toString())
+//                        .collection("placeItems")
+//                        .whereLessThan("created", Date()).get().addOnSuccessListener { result ->
+//                            Log.d("aaaa", result.documents.size.toString())
+//                        }
+
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w("Userlogin", "signInAnonymously:failure", task.exception)
                     Toast.makeText(baseContext, "Authentication failed.",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT).show()
                 }
             }
-
     }
 
     fun setupActive( location: Location) {
@@ -111,9 +118,10 @@ class MainActivity : AppCompatActivity() {
 
                 var firstActive = result.documents[0]
 
-                Log.d("dateactive", firstActive.data?.get("created").toString())
+                Log.d("dateactive", (firstActive.data?.get("created") as Timestamp).toDate().toString())
 
-                val compareDate = Date(firstActive.data?.get("created").toString())
+
+                val compareDate = (firstActive.data?.get("created") as Timestamp).toDate()
                 val nowDate = Date()
 
                 if ( compareDate?.time > nowDate?.time - 86400000  ) return@addOnSuccessListener
@@ -124,7 +132,6 @@ class MainActivity : AppCompatActivity() {
 
 //                docRef.document(result.documents[index].id).delete()
                 docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
-
             }
 
             for (i in 0..1) {
