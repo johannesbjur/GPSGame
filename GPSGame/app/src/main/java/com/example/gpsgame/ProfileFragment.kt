@@ -25,6 +25,17 @@ class ProfileFragment : Fragment() {
 
         activity = context as MainActivity
         auth = FirebaseAuth.getInstance()
+
+        var docRef = db.collection("users")
+                                        .document(auth.currentUser?.uid.toString())
+                                        .collection("placeItems")
+
+        docRef.whereEqualTo( "completed", true ).get().addOnSuccessListener { result ->
+
+            Log.d("profilefrag", result.documents.size.toString())
+
+        }
+
     }
 
     override fun onCreateView(

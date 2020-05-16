@@ -184,7 +184,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
                         for ( doc in querySnapshot.documents ) {
 
-                            if ( doc["active"] as Boolean ) {
+                            if ( doc["active"] as Boolean && !(doc["completed"] as Boolean) ) {
 
                                 var item = PlaceItem(
                                     doc["name"].toString(),

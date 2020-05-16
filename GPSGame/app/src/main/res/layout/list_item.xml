@@ -41,6 +41,7 @@
                 android:layout_marginStart="25dp"
                 android:layout_marginTop="20dp"
                 android:textStyle="bold"
+                android:textColor="@color/black"
                 app:layout_constraintStart_toEndOf="@+id/imageView"
                 app:layout_constraintTop_toTopOf="parent" />
 
