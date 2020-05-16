@@ -42,7 +42,10 @@ class ProfileFragment : Fragment() {
 //        Fade in text view?
         docRef.whereEqualTo( "completed", true ).get().addOnSuccessListener { result ->
 
-            viewOfLayout.stars_text.text = result.documents.size.toString()
+            viewOfLayout.stars_value.text = result.documents.size.toString()
+
+//            TODO Add medal calc value
+            viewOfLayout.medal_value.text = "3"
         }
 
         viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
