@@ -70,14 +70,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textColor="#404040"
+                    android:textColor="@color/darkGrey"
                     android:textSize="24sp" />
 
                 <TextView
                     android:id="@+id/medal_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="#B3B3B3"
+                    android:textColor="@color/lightGrey"
                     android:text="Medals"
                     android:textSize="14sp"
                     android:gravity="center" />
@@ -100,20 +100,32 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textColor="#404040"
+                    android:textColor="@color/darkGrey"
                     android:textSize="24sp" />
 
                 <TextView
                     android:id="@+id/stars_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="#B3B3B3"
+                    android:textColor="@color/lightGrey"
                     android:text="Stars"
                     android:textSize="14sp"
                     android:gravity="center" />
             </LinearLayout>
 
         </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/circle_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:progress="70"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="10dp"
+            android:progressDrawable="@drawable/progress_circle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
