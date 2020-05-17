@@ -4,7 +4,7 @@
     android:innerRadiusRatio="3"
     android:thickness="9dp"
     android:useLevel="true"
-    android:scaleWidth="100%">
+    android:scaleWidth="100%" >
 
     <solid android:color="@color/orange" />
 
