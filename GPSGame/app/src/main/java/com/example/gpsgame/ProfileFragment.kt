@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -28,9 +27,6 @@ class ProfileFragment : Fragment() {
 
         activity = context as MainActivity
         auth = FirebaseAuth.getInstance()
-
-
-
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -90,7 +86,7 @@ class ProfileFragment : Fragment() {
 
 
         viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
-        viewOfLayout.user_full_name.text = activity.user_full_name
+        viewOfLayout.user_full_name.text = activity.userFullName
 
         return viewOfLayout
     }

@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     var db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
 
-    var user_full_name = ""
+    var userFullName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                     db.collection( "users" )
                         .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
 
-                            user_full_name = if ( result.data?.get("first") != null &&  result.data?.get("last") != null ) {
+                            userFullName = if ( result.data?.get("first") != null &&  result.data?.get("last") != null ) {
 
                                 result.data?.get("first").toString() + " " + result.data?.get("last").toString()
                             } else "Guest"
