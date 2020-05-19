@@ -20,7 +20,7 @@ class ProfileFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var viewOfLayout: View
-    lateinit var activity: MainActivity
+    private lateinit var activity: MainActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +34,13 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
+        viewOfLayout.user_full_name.text = activity.userFullName
+        viewOfLayout.settingsBtn?.setOnClickListener {
+
+            activity.goToSettings()
+        }
 
         val docRef = db.collection("users")
             .document(auth.currentUser?.uid.toString())
@@ -87,15 +94,6 @@ class ProfileFragment : Fragment() {
                 viewOfLayout.progress_value_text.text = "0%"
                 viewOfLayout.circle_progress_bar.progress = 1
             }
-        }
-
-
-        viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
-        viewOfLayout.user_full_name.text = activity.userFullName
-
-        viewOfLayout.settingsBtn?.setOnClickListener {
-
-            activity.goToSettings()
         }
 
         return viewOfLayout

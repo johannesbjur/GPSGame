@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -31,6 +32,8 @@ class MainActivity : AppCompatActivity() {
     var db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
 
+    lateinit var navController: NavController
+
     var userFullName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
-        val navController = findNavController(R.id.nav_host_fragment)
+        navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(setOf(
@@ -89,14 +92,6 @@ class MainActivity : AppCompatActivity() {
 
                         setupActive( location )
                     }
-
-//                    TODO create completed this week progression circle
-//                    db.collection("users").document(auth.currentUser?.uid.toString())
-//                        .collection("placeItems")
-//                        .whereLessThan("created", Date()).get().addOnSuccessListener { result ->
-//                            Log.d("aaaa", result.documents.size.toString())
-//                        }
-
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w("Userlogin", "signInAnonymously:failure", task.exception)
@@ -134,8 +129,8 @@ class MainActivity : AppCompatActivity() {
                 docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
             }
 
+//            TODO change number of created place items per day
             for (i in 0..1) {
-
 //                Create coordinates in close range of user location
                 var lat = Random.nextDouble(location.latitude - 0.01, location.latitude + 0.01)
                 var long = Random.nextDouble(location.longitude - 0.01, location.longitude + 0.01)
@@ -149,14 +144,10 @@ class MainActivity : AppCompatActivity() {
 
 //            val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
 //            docRef.add(item)
-
         }
     }
 
-    fun goToSettings() {
-
-        val navController = findNavController(R.id.nav_host_fragment)
-        navController.navigate(R.id.navigation_settings)
-    }
-
+//    Navigation functions for profile and settings fragments
+    fun goToSettings()  = navController.navigate( R.id.navigation_settings )
+    fun goToProfile()   = navController.navigateUp()
 }
