@@ -3,6 +3,7 @@ package com.example.gpsgame
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -150,6 +151,12 @@ class MainActivity : AppCompatActivity() {
 //            docRef.add(item)
 
         }
+    }
+
+    fun goToSettings() {
+
+        val navController = findNavController(R.id.nav_host_fragment)
+        navController.navigate(R.id.navigation_settings)
     }
 
 }

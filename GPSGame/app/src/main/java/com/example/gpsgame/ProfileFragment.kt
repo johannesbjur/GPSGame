@@ -93,6 +93,11 @@ class ProfileFragment : Fragment() {
         viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
         viewOfLayout.user_full_name.text = activity.userFullName
 
+        viewOfLayout.settingsBtn?.setOnClickListener {
+
+            activity.goToSettings()
+        }
+
         return viewOfLayout
     }
 
