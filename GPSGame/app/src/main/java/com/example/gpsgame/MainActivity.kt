@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
                     Log.d("Userlogin", "signInAnonymously:success")
 
                     val user = auth.currentUser
-
                     val data: MutableMap<String, Any> = HashMap()
 
 //                    Set user data

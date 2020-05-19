@@ -35,9 +35,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
             android:text=""
-            android:textStyle="bold"
-            android:textSize="24sp"
             android:textColor="@color/black"
+            android:textSize="30sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/profile_img_card" />
@@ -51,7 +51,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_full_name">
+            app:layout_constraintTop_toBottomOf="@+id/user_rank_text">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -69,10 +69,10 @@
                     android:id="@+id/medal_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:gravity="center"
                     android:textColor="@color/darkGrey"
-                    android:textSize="24sp" />
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/medal_text"
@@ -100,10 +100,10 @@
                     android:id="@+id/stars_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:gravity="center"
                     android:textColor="@color/darkGrey"
-                    android:textSize="24sp" />
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/stars_text"
@@ -183,6 +183,29 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
+
+        <Button
+            android:id="@+id/settingsBtn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/ic_settings"
+            android:backgroundTint="@color/lightGrey"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/user_rank_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/lightGrey"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/user_full_name" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

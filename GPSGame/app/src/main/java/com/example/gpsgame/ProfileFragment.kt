@@ -42,12 +42,17 @@ class ProfileFragment : Fragment() {
 //        Fade in text view?
         docRef.whereEqualTo( "completed", true ).get().addOnSuccessListener { result ->
 
+//            TODO Add more "ranks"
+            when( result.documents.size ) {
+                in 0..10    -> viewOfLayout.user_rank_text.text = "Beginner"
+                in 10..20   -> viewOfLayout.user_rank_text.text = "Novice"
+            }
+
             viewOfLayout.stars_value.text = result.documents.size.toString()
 
 //            TODO Add medal calc value
             viewOfLayout.medal_value.text = "3"
         }
-
 
         val date = Date(Date().time - 86400000 * 7)
 
