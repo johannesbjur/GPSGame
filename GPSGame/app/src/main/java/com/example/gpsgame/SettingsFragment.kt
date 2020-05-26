@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_settings.view.*
+import java.util.*
+import kotlin.collections.HashMap
 
 class SettingsFragment : Fragment() {
 
@@ -26,6 +28,7 @@ class SettingsFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
     }
 
+    @ExperimentalStdlibApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,32 +45,51 @@ class SettingsFragment : Fragment() {
 
         docRef.get().addOnSuccessListener { result ->
 
-            Log.d("!!!", result.get("name").toString())
-
-            if ( result.get("name") != null ) {
-
-                viewOfLayout.usernameInput.hint = result.get("name").toString()
-            }
+            if ( result.get("name") != null )   viewOfLayout.usernameInput.hint = result.get("name").toString()
+            if ( result.get("email") != null )  viewOfLayout.emailInput.hint = result.get("email").toString()
+            if ( result.get("phone") != null )  viewOfLayout.phoneInput.hint = result.get("phone").toString()
         }
 
+        val data: MutableMap<String, Any> = HashMap()
 
+//        TODO Change to send on back button??
         viewOfLayout.usernameInput.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
 
-                val data: MutableMap<String, Any> = HashMap()
-
-                data["name"] = viewOfLayout.usernameInput.text.toString()
+                data["name"] = viewOfLayout.usernameInput.text.toString().capitalize(Locale.ROOT)
                 db.collection( "users" )
                     .document( auth.currentUser?.uid.toString() )
-                    .set( data )
+                    .update( data )
 
                 return@OnKeyListener true
             }
             false
         })
+        viewOfLayout.emailInput.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+
+                data["email"] = viewOfLayout.emailInput.text.toString()
+                db.collection( "users" )
+                    .document( auth.currentUser?.uid.toString() )
+                    .update( data )
+
+                return@OnKeyListener true
+            }
+            false
+        })
+        viewOfLayout.phoneInput.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
 
 
+                data["phone"] = viewOfLayout.emailInput.text.toString()
+                db.collection( "users" )
+                    .document( auth.currentUser?.uid.toString() )
+                    .update( data )
 
+                return@OnKeyListener true
+            }
+            false
+        })
 
 
         return viewOfLayout
