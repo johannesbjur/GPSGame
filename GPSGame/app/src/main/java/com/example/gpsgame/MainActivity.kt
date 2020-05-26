@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    var db = FirebaseFirestore.getInstance()
+    private val db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
 
     lateinit var navController: NavController
@@ -61,33 +61,7 @@ class MainActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
 
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d("Userlogin", "signInAnonymously:success")
-
-                    val user = auth.currentUser
-                    val data: MutableMap<String, Any> = HashMap()
-
-//                    Set user data
-//                    TODO move somewhere else, create user input
-//                    data["first"] = "Johannes"
-//                    data["last"] = "Bjurstromer"
-//                    db.collection( "users" )
-//                        .document( auth.currentUser?.uid.toString() )
-//                        .set( data )
-
-
-//                    Get user first and last name from db
-                    db.collection( "users" )
-                        .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
-
-                            userFullName = if ( result.data?.get("first") != null &&  result.data?.get("last") != null ) {
-
-                                result.data?.get("first").toString() + " " + result.data?.get("last").toString()
-                            } else "Guest"
-
-                        }
-
-//                    get user location and create place items with location
+//                    Get user location and create place items with location
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
 
                         setupActive( location )
@@ -101,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    fun setupActive( location: Location) {
+    private fun setupActive(location: Location) {
 
         var docRef = db.collection("users")
             .document(auth.currentUser?.uid.toString())
@@ -111,11 +85,8 @@ class MainActivity : AppCompatActivity() {
 
             if ( result.documents.size > 0 ) {
 
+//                TODO look over if firstActive is the right way to do this
                 var firstActive = result.documents[0]
-
-                Log.d("dateactive", (firstActive.data?.get("created") as Timestamp).toDate().toString())
-
-
                 val compareDate = (firstActive.data?.get("created") as Timestamp).toDate()
                 val nowDate = Date()
 
@@ -125,7 +96,6 @@ class MainActivity : AppCompatActivity() {
 //                Clear placeItems collection in database
             for ((index, document) in result.documents.withIndex()) {
 
-//                docRef.document(result.documents[index].id).delete()
                 docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
             }
 

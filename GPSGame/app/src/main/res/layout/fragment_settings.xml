@@ -47,5 +47,77 @@
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/settingsTitleText"
             app:layout_constraintTop_toBottomOf="@+id/settingsTitleText" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            app:layout_constraintStart_toStartOf="@+id/accountSubTitle"
+            app:layout_constraintTop_toBottomOf="@+id/accountSubTitle">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/userIcon"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_user_icon" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/settingsNameTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Name"
+                                android:textColor="@color/black"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <EditText
+                                android:id="@+id/usernameInput"
+                                android:layout_width="wrap_content"
+                                android:layout_height="0dp"
+                                android:layout_marginTop="3dp"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:ems="10"
+                                android:hint="Guest"
+                                android:inputType="textPersonName"
+                                android:paddingLeft="0dp"
+                                android:paddingRight="0dp"
+                                android:textColor="@color/darkGrey"
+                                android:textColorHint="@color/lightGrey"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/settingsNameTitle" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
