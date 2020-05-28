@@ -10,17 +10,19 @@ import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
+import kotlinx.android.synthetic.main.fragment_profile.view.user_full_name
 import java.util.*
 
 
 class ProfileFragment : Fragment() {
 
-    var db = FirebaseFirestore.getInstance()
+    private val db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
 
     private lateinit var viewOfLayout: View
-    lateinit var activity: MainActivity
+    private lateinit var activity: MainActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +36,20 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
+        viewOfLayout.user_full_name.text = activity.userFullName
+        viewOfLayout.settingsBtn?.setOnClickListener {
+
+            activity.goToSettings()
+        }
+
+//      Get user name from db and set name text to user name or Guest
+        db.collection( "users" )
+            .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
+
+                user_full_name.text = ( result.data?.get("name") ?: "Guest" ) as String
+            }
 
         val docRef = db.collection("users")
             .document(auth.currentUser?.uid.toString())
@@ -70,14 +86,14 @@ class ProfileFragment : Fragment() {
 
                 for (document in result.documents) {
 
-                    if (document["completed"] as Boolean) completed++
+                    if ( document["completed"] as Boolean ) completed++
                 }
 
                 var percentComplete = (completed / total * 100).toInt()
 
                 viewOfLayout.progress_value_text.text = percentComplete.toString() + "%"
 
-                if ( percentComplete == 0) percentComplete = 1
+                if ( percentComplete == 0 ) percentComplete = 1
                 viewOfLayout.circle_progress_bar.setProgress(percentComplete, true)
 
                 Log.d("profilef", "${total} ${completed}")
@@ -88,10 +104,6 @@ class ProfileFragment : Fragment() {
                 viewOfLayout.circle_progress_bar.progress = 1
             }
         }
-
-
-        viewOfLayout = inflater.inflate(R.layout.fragment_profile, container, false)
-        viewOfLayout.user_full_name.text = activity.userFullName
 
         return viewOfLayout
     }

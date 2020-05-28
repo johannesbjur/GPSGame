@@ -3,8 +3,10 @@ package com.example.gpsgame
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -27,8 +29,10 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    var db = FirebaseFirestore.getInstance()
+    private val db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
+
+    lateinit var navController: NavController
 
     var userFullName = ""
 
@@ -37,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
-        val navController = findNavController(R.id.nav_host_fragment)
+        navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(setOf(
@@ -57,45 +61,11 @@ class MainActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
 
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d("Userlogin", "signInAnonymously:success")
-
-                    val user = auth.currentUser
-                    val data: MutableMap<String, Any> = HashMap()
-
-//                    Set user data
-//                    TODO move somewhere else, create user input
-//                    data["first"] = "Johannes"
-//                    data["last"] = "Bjurstromer"
-//                    db.collection( "users" )
-//                        .document( auth.currentUser?.uid.toString() )
-//                        .set( data )
-
-
-//                    Get user first and last name from db
-                    db.collection( "users" )
-                        .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
-
-                            userFullName = if ( result.data?.get("first") != null &&  result.data?.get("last") != null ) {
-
-                                result.data?.get("first").toString() + " " + result.data?.get("last").toString()
-                            } else "Guest"
-
-                        }
-
-//                    get user location and create place items with location
+//                    Get user location and create place items with location
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
 
                         setupActive( location )
                     }
-
-//                    TODO create completed this week progression circle
-//                    db.collection("users").document(auth.currentUser?.uid.toString())
-//                        .collection("placeItems")
-//                        .whereLessThan("created", Date()).get().addOnSuccessListener { result ->
-//                            Log.d("aaaa", result.documents.size.toString())
-//                        }
-
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w("Userlogin", "signInAnonymously:failure", task.exception)
@@ -105,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    fun setupActive( location: Location) {
+    private fun setupActive(location: Location) {
 
         var docRef = db.collection("users")
             .document(auth.currentUser?.uid.toString())
@@ -115,11 +85,8 @@ class MainActivity : AppCompatActivity() {
 
             if ( result.documents.size > 0 ) {
 
+//                TODO look over if firstActive is the right way to do this
                 var firstActive = result.documents[0]
-
-                Log.d("dateactive", (firstActive.data?.get("created") as Timestamp).toDate().toString())
-
-
                 val compareDate = (firstActive.data?.get("created") as Timestamp).toDate()
                 val nowDate = Date()
 
@@ -129,12 +96,11 @@ class MainActivity : AppCompatActivity() {
 //                Clear placeItems collection in database
             for ((index, document) in result.documents.withIndex()) {
 
-//                docRef.document(result.documents[index].id).delete()
                 docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
             }
 
+//            TODO change number of created place items per day
             for (i in 0..1) {
-
 //                Create coordinates in close range of user location
                 var lat = Random.nextDouble(location.latitude - 0.01, location.latitude + 0.01)
                 var long = Random.nextDouble(location.longitude - 0.01, location.longitude + 0.01)
@@ -148,8 +114,10 @@ class MainActivity : AppCompatActivity() {
 
 //            val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
 //            docRef.add(item)
-
         }
     }
 
+//    Navigation functions for profile and settings fragments
+    fun goToSettings()  = navController.navigate( R.id.navigation_settings )
+    fun goToProfile()   = navController.navigateUp()
 }
