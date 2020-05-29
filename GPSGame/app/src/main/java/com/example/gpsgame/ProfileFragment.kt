@@ -1,18 +1,22 @@
 package com.example.gpsgame
 
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jjoe64.graphview.series.DataPoint
+import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
-import kotlinx.android.synthetic.main.fragment_profile.view.user_full_name
+import org.joda.time.DateTime
 import java.util.*
 
 
@@ -71,10 +75,12 @@ class ProfileFragment : Fragment() {
         }
 
         val date = Date(Date().time - 86400000 * 7)
+        val joda = DateTime.now().minusDays(7).withHourOfDay(0).withMinuteOfHour(0)
 
         Log.d("profilef", date.toString())
+        Log.d("profilef", joda.toString())
 
-        docRef.whereGreaterThanOrEqualTo("created", date).get().addOnSuccessListener { result ->
+        docRef.whereGreaterThanOrEqualTo("created", joda.toDate()).get().addOnSuccessListener { result ->
 
             Log.d("profilef", result.documents.size.toString())
 
@@ -84,11 +90,45 @@ class ProfileFragment : Fragment() {
 
                 var completed = 0.0F
 
+                var y = 0
+
+                val map = mutableMapOf<Int, Int>()
+
                 for (document in result.documents) {
 
                     if ( document["completed"] as Boolean ) completed++
+
+//                    TODO check if completed
+                    val day = DateTime((document["created"] as Timestamp).toDate()).dayOfMonth().get()
+
+                    map[day] =
+                        if ( map[day] != null ) map[day]!! + 1
+                        else 1
                 }
 
+                Log.d("profilef", map.toString())
+
+
+                val series = LineGraphSeries<DataPoint>()
+
+                for ( (index, value) in map ) {
+                    Log.d("profilef", "${value}, ${index}")
+
+                    var dp = DataPoint(index.toDouble(), value.toDouble())
+                    series.appendData( dp, true, 5)
+                }
+
+                series.color = Color.parseColor("#FF9900")
+                series.isDrawDataPoints = true
+                series.thickness = 14
+
+                viewOfLayout.line_graph.addSeries(series)
+
+                viewOfLayout.line_graph.gridLabelRenderer.gridColor = 80000000
+
+
+
+                
                 var percentComplete = (completed / total * 100).toInt()
 
                 viewOfLayout.progress_value_text.text = percentComplete.toString() + "%"
