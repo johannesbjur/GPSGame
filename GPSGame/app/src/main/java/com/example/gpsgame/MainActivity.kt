@@ -6,6 +6,8 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -81,15 +83,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupActive(location: Location) {
 
-        var docRef = db.collection("users")
+        val docRef = db.collection("users")
             .document(auth.currentUser?.uid.toString())
             .collection("placeItems")
 
-        var yday = DateTime.now().minusDays(1).toDate()
+        val yesterday = DateTime.now().minusDays(1).toDate()
 
-        docRef.whereGreaterThanOrEqualTo("created", yday).get().addOnSuccessListener { result ->
+        docRef.whereGreaterThanOrEqualTo("created", yesterday).get().addOnSuccessListener { resultToday ->
 
-            if ( result.documents.size < dailyItemsAmount) {
+            if ( resultToday.documents.size < dailyItemsAmount) {
                 docRef.get().addOnSuccessListener { result ->
 
 //                Clear placeItems collection in database
