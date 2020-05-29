@@ -50,6 +50,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         // 3
         private const val REQUEST_CHECK_SETTINGS = 2
 
+        fun focusMap( lat: Double, long: Double ) {
+
+            Log.d("mapFocus", "From map fragment")
+        }
+
     }
 
     override fun onCreateView(

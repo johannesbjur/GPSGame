@@ -29,6 +29,12 @@ class PlaceRecyclerAdapter(private val context: Context, private val placeItems:
         val item = placeItems[position]
 
         holder.textViewTitle.text = item.name
+
+        holder.itemView.setOnClickListener {
+
+            MapFragment.focusMap( 1.0, 1.0)
+        }
+
     }
 
 
