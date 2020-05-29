@@ -74,13 +74,11 @@ class ProfileFragment : Fragment() {
             viewOfLayout.medal_value.text = "3"
         }
 
-        val date = Date(Date().time - 86400000 * 7)
-        val joda = DateTime.now().minusDays(7).withHourOfDay(0).withMinuteOfHour(0)
+//        val date = Date(Date().time - 86400000 * 7)
+        val weekAgoDate = DateTime.now().minusDays(7).withHourOfDay(0).withMinuteOfHour(0)
 
-        Log.d("profilef", date.toString())
-        Log.d("profilef", joda.toString())
 
-        docRef.whereGreaterThanOrEqualTo("created", joda.toDate()).get().addOnSuccessListener { result ->
+        docRef.whereGreaterThanOrEqualTo("created", weekAgoDate.toDate()).get().addOnSuccessListener { result ->
 
             Log.d("profilef", result.documents.size.toString())
 
@@ -89,8 +87,6 @@ class ProfileFragment : Fragment() {
                 val total = result.documents.size.toFloat()
 
                 var completed = 0.0F
-
-                var y = 0
 
                 val map = mutableMapOf<Int, Int>()
 
@@ -112,9 +108,7 @@ class ProfileFragment : Fragment() {
                 val series = LineGraphSeries<DataPoint>()
 
                 for ( (index, value) in map ) {
-                    Log.d("profilef", "${value}, ${index}")
-
-                    var dp = DataPoint(index.toDouble(), value.toDouble())
+                    val dp = DataPoint(index.toDouble(), value.toDouble())
                     series.appendData( dp, true, 5)
                 }
 
@@ -123,9 +117,15 @@ class ProfileFragment : Fragment() {
                 series.thickness = 14
 
                 viewOfLayout.line_graph.addSeries(series)
-
                 viewOfLayout.line_graph.gridLabelRenderer.gridColor = 80000000
 
+                viewOfLayout.line_graph.viewport.setMinY(0.0)
+                viewOfLayout.line_graph.viewport.setMaxY(2.0)
+                viewOfLayout.line_graph.viewport.isYAxisBoundsManual = true
+
+                viewOfLayout.line_graph.viewport.setMinX(weekAgoDate.dayOfMonth().get().toDouble())
+                viewOfLayout.line_graph.viewport.setMaxX(weekAgoDate.dayOfMonth().get().toDouble() + 7)
+                viewOfLayout.line_graph.viewport.isXAxisBoundsManual = true
 
 
 
