@@ -128,7 +128,7 @@ class ProfileFragment : Fragment() {
 
 
 
-                
+
                 var percentComplete = (completed / total * 100).toInt()
 
                 viewOfLayout.progress_value_text.text = percentComplete.toString() + "%"

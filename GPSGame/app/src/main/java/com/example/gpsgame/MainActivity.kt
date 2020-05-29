@@ -17,6 +17,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.random.Random
@@ -35,6 +36,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var navController: NavController
 
     var userFullName = ""
+
+//    TODO change number of created place items per day
+    private val dailyItemsAmount = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,39 +85,32 @@ class MainActivity : AppCompatActivity() {
             .document(auth.currentUser?.uid.toString())
             .collection("placeItems")
 
-        docRef.get().addOnSuccessListener { result ->
+        var yday = DateTime.now().minusDays(1).toDate()
 
-            if ( result.documents.size > 0 ) {
+        docRef.whereGreaterThanOrEqualTo("created", yday).get().addOnSuccessListener { result ->
 
-//                TODO look over if firstActive is the right way to do this
-                var firstActive = result.documents[0]
-                val compareDate = (firstActive.data?.get("created") as Timestamp).toDate()
-                val nowDate = Date()
-
-                if ( compareDate?.time > nowDate?.time - 86400000  ) return@addOnSuccessListener
-            }
+            if ( result.documents.size < dailyItemsAmount) {
+                docRef.get().addOnSuccessListener { result ->
 
 //                Clear placeItems collection in database
-            for ((index, document) in result.documents.withIndex()) {
+                    for ((index, document) in result.documents.withIndex()) {
 
-                docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
+                        docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
+                    }
+
+                    for (i in 0 until dailyItemsAmount) {
+//                      Create coordinates in close range of user location
+                        var lat = Random.nextDouble(location.latitude - 0.01, location.latitude + 0.01)
+                        var long = Random.nextDouble(location.longitude - 0.01, location.longitude + 0.01)
+                        lat = Math.round(lat * 1000000.0) / 1000000.0
+                        long = Math.round(long * 1000000.0) / 1000000.0
+
+                        val item = PlaceItem("Random place", lat, long)
+
+                        docRef.add(item)
+                    }
+                }
             }
-
-//            TODO change number of created place items per day
-            for (i in 0..1) {
-//                Create coordinates in close range of user location
-                var lat = Random.nextDouble(location.latitude - 0.01, location.latitude + 0.01)
-                var long = Random.nextDouble(location.longitude - 0.01, location.longitude + 0.01)
-                lat = Math.round(lat * 1000000.0) / 1000000.0
-                long = Math.round(long * 1000000.0) / 1000000.0
-
-                val item = PlaceItem("Random place", lat, long)
-
-                docRef.add(item)
-            }
-
-//            val item = PlaceItem( "Gamla stan",59.325695, 18.071869 )
-//            docRef.add(item)
         }
     }
 
