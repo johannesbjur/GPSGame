@@ -287,7 +287,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     }
 
     // 3
-    public override fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (!locationUpdateState) {
             startLocationUpdates()
@@ -295,6 +295,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     }
 
 
+    fun focusMap( lat: Double, long: Double ) {
+
+        Log.d("mapFocus", "From inside map fragment")
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(lat, long)))
+
+    }
 
 
 }

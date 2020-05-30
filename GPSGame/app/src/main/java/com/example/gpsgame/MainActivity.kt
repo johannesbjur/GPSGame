@@ -54,6 +54,9 @@ class MainActivity : AppCompatActivity() {
             R.id.navigation_map, R.id.navigation_list, R.id.navigation_profile ))
         navView.setupWithNavController(navController)
 
+        val mapFragment = MapFragment()
+        supportFragmentManager.beginTransaction().add(R.id.fragment_map, mapFragment, "map").commit()
+
         auth = FirebaseAuth.getInstance()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
@@ -119,4 +122,12 @@ class MainActivity : AppCompatActivity() {
 //    Navigation functions for profile and settings fragments
     fun goToSettings()  = navController.navigate( R.id.navigation_settings )
     fun goToProfile()   = navController.navigateUp()
+
+    fun goFocusMap( lat: Double, long: Double ) {
+
+        val fragment = supportFragmentManager.findFragmentByTag("map") as MapFragment
+        fragment.focusMap( lat, long )
+
+        navController.navigate( R.id.navigation_map )
+    }
 }
