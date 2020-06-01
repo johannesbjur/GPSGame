@@ -298,7 +298,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     fun focusMap( lat: Double, long: Double ) {
 
         Log.d("mapFocus", "From inside map fragment")
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(lat, long)))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, long), 15f))
 
     }
 

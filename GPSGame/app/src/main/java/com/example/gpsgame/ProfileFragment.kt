@@ -107,10 +107,10 @@ class ProfileFragment : Fragment() {
 
                 val series = LineGraphSeries<DataPoint>()
 
-                for ( (index, value) in map ) {
-                    val dp = DataPoint(index.toDouble(), value.toDouble())
-                    series.appendData( dp, true, 5)
-                }
+//                for ( (index, value) in map ) {
+//                    val dp = DataPoint(index.toDouble(), value.toDouble())
+//                    series.appendData( dp, true, 5)
+//                }
 
                 series.color = Color.parseColor("#FF9900")
                 series.isDrawDataPoints = true

@@ -40,7 +40,7 @@ class SettingsFragment : Fragment() {
             activity.goToProfile()
         }
 
-        var docRef = db.collection("users")
+        val docRef = db.collection("users")
             .document(auth.currentUser?.uid.toString())
 
         docRef.get().addOnSuccessListener { result ->
