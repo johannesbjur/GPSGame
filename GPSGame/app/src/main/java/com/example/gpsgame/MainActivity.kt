@@ -165,4 +165,10 @@ class MainActivity : AppCompatActivity() {
         fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit()
         activeFragment = fragment
     }
+
+    fun redrawList() {
+
+        val fragment = supportFragmentManager.findFragmentByTag("list") as ListFragment
+        fragment.resetAdapter()
+    }
 }

@@ -211,6 +211,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                             }
 
                         }
+                        activity.redrawList()
                     }
 
                 }
