@@ -50,9 +50,11 @@ class ProfileFragment : Fragment() {
 
 //      Get user name from db and set name text to user name or Guest
         db.collection( "users" )
-            .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
+            .document( auth.currentUser?.uid.toString() ).addSnapshotListener { querySnapshot, e ->
 
-                user_full_name.text = ( result.data?.get("name") ?: "Guest" ) as String
+                if (querySnapshot != null) {
+                    user_full_name.text = ( querySnapshot.data?.get("name") ?: "Guest" ) as String
+                }
             }
 
         val docRef = db.collection("users")
@@ -60,37 +62,38 @@ class ProfileFragment : Fragment() {
             .collection("placeItems")
 
 //        Fade in text view?
-        docRef.whereEqualTo( "completed", true ).get().addOnSuccessListener { result ->
+        docRef.whereEqualTo( "completed", true ).addSnapshotListener { querySnapshot, e ->
 
+            if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 //            TODO Add more "ranks"
-            when( result.documents.size ) {
-                in 0..10    -> viewOfLayout.user_rank_text.text = "Beginner"
-                in 10..20   -> viewOfLayout.user_rank_text.text = "Novice"
-            }
+                when (querySnapshot.documents.size) {
+                    in 0..10 -> viewOfLayout.user_rank_text.text = "Beginner"
+                    in 10..20 -> viewOfLayout.user_rank_text.text = "Novice"
+                }
 
-            viewOfLayout.stars_value.text = result.documents.size.toString()
+                viewOfLayout.stars_value.text = querySnapshot.documents.size.toString()
 
 //            TODO Add medal calc value
-            viewOfLayout.medal_value.text = "3"
+                viewOfLayout.medal_value.text = "3"
+            }
         }
 
 //        val date = Date(Date().time - 86400000 * 7)
         val weekAgoDate = DateTime.now().minusDays(7).withHourOfDay(0).withMinuteOfHour(0)
 
 
-        docRef.whereGreaterThanOrEqualTo("created", weekAgoDate.toDate()).get().addOnSuccessListener { result ->
+        docRef.whereGreaterThanOrEqualTo("created", weekAgoDate.toDate()).addSnapshotListener { querySnapshot, e ->
 
-            Log.d("profilef", result.documents.size.toString())
 
-            if ( result.documents.size > 0 ) {
+            if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 
-                val total = result.documents.size.toFloat()
+                val total = querySnapshot.documents.size.toFloat()
 
                 var completed = 0.0F
 
                 val map = mutableMapOf<Int, Int>()
 
-                for (document in result.documents) {
+                for (document in querySnapshot.documents) {
 
                     if ( document["completed"] as Boolean ) completed++
 
