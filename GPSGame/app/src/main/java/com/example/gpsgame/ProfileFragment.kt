@@ -12,13 +12,13 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter
+import com.jjoe64.graphview.series.BarGraphSeries
 import com.jjoe64.graphview.series.DataPoint
-import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
-import java.util.*
+import java.text.SimpleDateFormat
 
 
 class ProfileFragment : Fragment() {
@@ -80,10 +80,10 @@ class ProfileFragment : Fragment() {
         }
 
 //        val date = Date(Date().time - 86400000 * 7)
-        val weekAgoDate = DateTime.now().minusDays(7).withHourOfDay(0).withMinuteOfHour(0)
+        val getFrom = DateTime.now().minusDays(5).withHourOfDay(0).withMinuteOfHour(0)
 
 
-        docRef.whereGreaterThanOrEqualTo("created", weekAgoDate.toDate()).addSnapshotListener { querySnapshot, e ->
+        docRef.whereGreaterThanOrEqualTo("created", getFrom.toDate()).addSnapshotListener { querySnapshot, e ->
 
 
             if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
@@ -97,44 +97,51 @@ class ProfileFragment : Fragment() {
 //                Create date set map
                 for (document in querySnapshot.documents) {
 
-                    if ( document["completed"] as Boolean ) completed++
-
-//                    TODO check if completed
                     val itemDate = DateTime((document["created"] as Timestamp).toDate())
-                    val day = itemDate.dayOfMonth().get()
+                    val dateString = itemDate.year().get().toString() +
+                                            "-" + itemDate.monthOfYear().get().toString() +
+                                            "-" + itemDate.dayOfMonth().get().toString()
 
-                    map[itemDate.toString()] =
-                        if ( map[itemDate.toString()] != null ) map[itemDate.toString()]!! + 1
-                        else 1
+                    if ( map[dateString] == null ) map[dateString] = 0
+                    if ( document["completed"] as Boolean ){
+                        map[dateString] = map[dateString]!! + 1
+                        completed++
+                    }
                 }
 
                 Log.d("profilef", map.toString())
+                Log.d("profilef", map.size.toString())
 
 
-                val series = LineGraphSeries<DataPoint>()
+                val series = BarGraphSeries<DataPoint>()
+
+
 
                 for ( (index, value) in map ) {
-                    val x = DateTime(index).toDate()
 
-                    Log.d("profilef", x.toString())
-                    val dp = DataPoint(x, value.toDouble())
-                    series.appendData( dp, true, 5)
+                    val dp = DataPoint( DateTime(index).toDate(), value.toDouble() )
+                    series.appendData( dp, true, 5 )
                 }
 
                 series.color = Color.parseColor("#FF9900")
-                series.isDrawDataPoints = true
-                series.thickness = 14
-
+                series.spacing = 50
                 viewOfLayout.line_graph.addSeries(series)
+
+
+                viewOfLayout.line_graph.gridLabelRenderer.labelFormatter = DateAsXAxisLabelFormatter(getActivity(), SimpleDateFormat("MM-dd"))
+                viewOfLayout.line_graph.gridLabelRenderer.numHorizontalLabels = 5
+
+
                 viewOfLayout.line_graph.gridLabelRenderer.gridColor = 80000000
 
                 viewOfLayout.line_graph.viewport.setMinY(0.0)
-                viewOfLayout.line_graph.viewport.setMaxY(2.0)
+                viewOfLayout.line_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
                 viewOfLayout.line_graph.viewport.isYAxisBoundsManual = true
 
-//                viewOfLayout.line_graph.viewport.setMinX(weekAgoDate.dayOfMonth().get().toDouble())
-//                viewOfLayout.line_graph.viewport.setMaxX(weekAgoDate.dayOfMonth().get().toDouble() + 7)
-                viewOfLayout.line_graph.viewport.isXAxisBoundsManual = true
+//                TODO fix x axis
+//                viewOfLayout.line_graph.viewport.setMinX(getFrom.toDate().time.toDouble())
+//                viewOfLayout.line_graph.viewport.setMaxX(Date().time.toDouble())
+//                viewOfLayout.line_graph.viewport.isXAxisBoundsManual = true
 
 
 
@@ -145,8 +152,8 @@ class ProfileFragment : Fragment() {
                 if ( percentComplete == 0 ) percentComplete = 1
                 viewOfLayout.circle_progress_bar.setProgress(percentComplete, true)
 
-                Log.d("profilef", "${total} ${completed}")
-                Log.d("profilef", "${completed / total * 100}")
+//                Log.d("profilef", "${total} ${completed}")
+//                Log.d("profilef", "${completed / total * 100}")
             }
             else {
                 viewOfLayout.progress_value_text.text = "0%"

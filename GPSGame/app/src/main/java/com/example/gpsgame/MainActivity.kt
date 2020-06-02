@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
 
     //    TODO change number of created place items per day
-    private val dailyItemsAmount = 2
+    val dailyItemsAmount = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
