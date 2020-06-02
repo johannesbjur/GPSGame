@@ -17,6 +17,7 @@ import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import java.util.*
 
 
@@ -91,17 +92,19 @@ class ProfileFragment : Fragment() {
 
                 var completed = 0.0F
 
-                val map = mutableMapOf<Int, Int>()
+                val map = mutableMapOf<String, Int>()
 
+//                Create date set map
                 for (document in querySnapshot.documents) {
 
                     if ( document["completed"] as Boolean ) completed++
 
 //                    TODO check if completed
-                    val day = DateTime((document["created"] as Timestamp).toDate()).dayOfMonth().get()
+                    val itemDate = DateTime((document["created"] as Timestamp).toDate())
+                    val day = itemDate.dayOfMonth().get()
 
-                    map[day] =
-                        if ( map[day] != null ) map[day]!! + 1
+                    map[itemDate.toString()] =
+                        if ( map[itemDate.toString()] != null ) map[itemDate.toString()]!! + 1
                         else 1
                 }
 
@@ -110,10 +113,13 @@ class ProfileFragment : Fragment() {
 
                 val series = LineGraphSeries<DataPoint>()
 
-//                for ( (index, value) in map ) {
-//                    val dp = DataPoint(index.toDouble(), value.toDouble())
-//                    series.appendData( dp, true, 5)
-//                }
+                for ( (index, value) in map ) {
+                    val x = DateTime(index).toDate()
+
+                    Log.d("profilef", x.toString())
+                    val dp = DataPoint(x, value.toDouble())
+                    series.appendData( dp, true, 5)
+                }
 
                 series.color = Color.parseColor("#FF9900")
                 series.isDrawDataPoints = true
@@ -126,8 +132,8 @@ class ProfileFragment : Fragment() {
                 viewOfLayout.line_graph.viewport.setMaxY(2.0)
                 viewOfLayout.line_graph.viewport.isYAxisBoundsManual = true
 
-                viewOfLayout.line_graph.viewport.setMinX(weekAgoDate.dayOfMonth().get().toDouble())
-                viewOfLayout.line_graph.viewport.setMaxX(weekAgoDate.dayOfMonth().get().toDouble() + 7)
+//                viewOfLayout.line_graph.viewport.setMinX(weekAgoDate.dayOfMonth().get().toDouble())
+//                viewOfLayout.line_graph.viewport.setMaxX(weekAgoDate.dayOfMonth().get().toDouble() + 7)
                 viewOfLayout.line_graph.viewport.isXAxisBoundsManual = true
 
 
