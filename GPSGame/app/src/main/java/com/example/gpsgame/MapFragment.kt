@@ -50,6 +50,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         // 3
         private const val REQUEST_CHECK_SETTINGS = 2
 
+        fun focusMap( lat: Double, long: Double ) {
+
+            Log.d("mapFocus", "From map fragment")
+        }
+
     }
 
     override fun onCreateView(
@@ -206,6 +211,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                             }
 
                         }
+                        activity.redrawList()
                     }
 
                 }
@@ -282,7 +288,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     }
 
     // 3
-    public override fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (!locationUpdateState) {
             startLocationUpdates()
@@ -290,6 +296,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     }
 
 
+    fun focusMap( lat: Double, long: Double ) {
+
+        Log.d("mapFocus", "From inside map fragment")
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, long), 15f))
+
+    }
 
 
 }

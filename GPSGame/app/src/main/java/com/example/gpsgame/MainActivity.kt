@@ -3,11 +3,9 @@ package com.example.gpsgame
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.findFragment
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,12 +14,9 @@ import com.example.navigationgame.PlaceItem
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.joda.time.DateTime
-import java.util.*
-import kotlin.collections.HashMap
 import kotlin.random.Random
 
 
@@ -39,7 +34,15 @@ class MainActivity : AppCompatActivity() {
 
     var userFullName = ""
 
-//    TODO change number of created place items per day
+    private val mapFragment         = MapFragment()
+    private val profileFragment     = ProfileFragment()
+    private val listFragment        = ListFragment()
+    private val settingsFragment    = SettingsFragment()
+    private var activeFragment: Fragment        = mapFragment
+    private val fragmentManager  = supportFragmentManager
+
+
+    //    TODO change number of created place items per day
     private val dailyItemsAmount = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +56,14 @@ class MainActivity : AppCompatActivity() {
         val appBarConfiguration = AppBarConfiguration(setOf(
             R.id.navigation_map, R.id.navigation_list, R.id.navigation_profile ))
         navView.setupWithNavController(navController)
+
+
+        fragmentManager.beginTransaction().apply {
+            add(R.id.container, mapFragment, "map")
+            add(R.id.container, listFragment, "list").hide(listFragment)
+            add(R.id.container, profileFragment, "profile").hide(profileFragment)
+            add(R.id.container, settingsFragment, "settings").hide(settingsFragment)
+        }.commit()
 
         auth = FirebaseAuth.getInstance()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -79,6 +90,25 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT).show()
                 }
             }
+
+        findViewById<BottomNavigationView>(R.id.nav_view).setOnNavigationItemSelectedListener { menuItem ->
+
+            when (menuItem.itemId) {
+                R.id.navigation_map -> {
+                    swapTo( mapFragment )
+                    true
+                }
+                R.id.navigation_list -> {
+                    swapTo( listFragment )
+                    true
+                }
+                R.id.navigation_profile -> {
+                    swapTo( profileFragment )
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun setupActive(location: Location) {
@@ -117,6 +147,28 @@ class MainActivity : AppCompatActivity() {
     }
 
 //    Navigation functions for profile and settings fragments
-    fun goToSettings()  = navController.navigate( R.id.navigation_settings )
-    fun goToProfile()   = navController.navigateUp()
+    fun goToSettings() = swapTo( settingsFragment )
+    fun goToProfile() = swapTo( profileFragment )
+
+    fun goFocusMap( lat: Double, long: Double ) {
+
+        val fragment = supportFragmentManager.findFragmentByTag("map") as MapFragment
+        fragment.focusMap( lat, long )
+
+        swapTo( mapFragment )
+
+        findViewById<BottomNavigationView>(R.id.nav_view).selectedItemId = R.id.navigation_map
+    }
+
+    private fun swapTo( fragment: Fragment ) {
+
+        fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit()
+        activeFragment = fragment
+    }
+
+    fun redrawList() {
+
+        val fragment = supportFragmentManager.findFragmentByTag("list") as ListFragment
+        fragment.resetAdapter()
+    }
 }
