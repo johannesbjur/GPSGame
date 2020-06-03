@@ -42,7 +42,6 @@ class MainActivity : AppCompatActivity() {
     private val fragmentManager  = supportFragmentManager
 
 
-    //    TODO change number of created place items per day
     val dailyItemsAmount = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,7 +126,7 @@ class MainActivity : AppCompatActivity() {
 //                Clear placeItems collection in database
                     for ((index, document) in result.documents.withIndex()) {
 
-                        docRef.document(result.documents[index].id).update(mapOf("completed" to false, "active" to false))
+                        docRef.document(result.documents[index].id).update(mapOf("active" to false))
                     }
 
                     for (i in 0 until dailyItemsAmount) {

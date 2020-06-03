@@ -12,13 +12,13 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter
+import com.jjoe64.graphview.helper.StaticLabelsFormatter
 import com.jjoe64.graphview.series.BarGraphSeries
 import com.jjoe64.graphview.series.DataPoint
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import org.joda.time.DateTime
-import java.text.SimpleDateFormat
+
 
 
 class ProfileFragment : Fragment() {
@@ -28,6 +28,9 @@ class ProfileFragment : Fragment() {
 
     private lateinit var viewOfLayout: View
     private lateinit var activity: MainActivity
+
+
+    private val graphGetDaysBack = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,8 +83,7 @@ class ProfileFragment : Fragment() {
         }
 
 //        val date = Date(Date().time - 86400000 * 7)
-        val getFrom = DateTime.now().minusDays(5).withHourOfDay(0).withMinuteOfHour(0)
-
+        val getFrom = DateTime.now().minusDays(graphGetDaysBack).withHourOfDay(0).withMinuteOfHour(0)
 
         docRef.whereGreaterThanOrEqualTo("created", getFrom.toDate()).addSnapshotListener { querySnapshot, e ->
 
@@ -93,16 +95,20 @@ class ProfileFragment : Fragment() {
                 var completed = 0.0F
 
                 val map = mutableMapOf<String, Int>()
+                val dateStrings = mutableListOf<String>()
 
 //                Create date set map
+//                TODO Clean this loop
                 for (document in querySnapshot.documents) {
 
                     val itemDate = DateTime((document["created"] as Timestamp).toDate())
-                    val dateString = itemDate.year().get().toString() +
-                                            "-" + itemDate.monthOfYear().get().toString() +
+                    val dateString = itemDate.monthOfYear().get().toString() +
                                             "-" + itemDate.dayOfMonth().get().toString()
 
-                    if ( map[dateString] == null ) map[dateString] = 0
+                    if ( map[dateString] == null ){
+                        map[dateString] = 0
+                        dateStrings.add(dateString)
+                    }
                     if ( document["completed"] as Boolean ){
                         map[dateString] = map[dateString]!! + 1
                         completed++
@@ -115,34 +121,33 @@ class ProfileFragment : Fragment() {
 
                 val series = BarGraphSeries<DataPoint>()
 
-
-
+                var i = 0
                 for ( (index, value) in map ) {
 
-                    val dp = DataPoint( DateTime(index).toDate(), value.toDouble() )
-                    series.appendData( dp, true, 5 )
+                    val dp = DataPoint( i.toDouble(), value.toDouble() )
+                    series.appendData( dp, true, graphGetDaysBack )
+                    i++
                 }
 
                 series.color = Color.parseColor("#FF9900")
                 series.spacing = 50
+//                viewOfLayout.line_graph.getGridLabelRenderer().setHorizontalLabelsAngle(135)
+
+                viewOfLayout.line_graph.removeAllSeries()
                 viewOfLayout.line_graph.addSeries(series)
 
 
-                viewOfLayout.line_graph.gridLabelRenderer.labelFormatter = DateAsXAxisLabelFormatter(getActivity(), SimpleDateFormat("MM-dd"))
-                viewOfLayout.line_graph.gridLabelRenderer.numHorizontalLabels = 5
-
-
+                val staticLabelsFormatter = StaticLabelsFormatter(viewOfLayout.line_graph)
+                staticLabelsFormatter.setHorizontalLabels(
+                    dateStrings.toTypedArray()
+                )
+                viewOfLayout.line_graph.gridLabelRenderer.labelFormatter = staticLabelsFormatter
                 viewOfLayout.line_graph.gridLabelRenderer.gridColor = 80000000
 
                 viewOfLayout.line_graph.viewport.setMinY(0.0)
                 viewOfLayout.line_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
                 viewOfLayout.line_graph.viewport.isYAxisBoundsManual = true
-
-//                TODO fix x axis
-//                viewOfLayout.line_graph.viewport.setMinX(getFrom.toDate().time.toDouble())
-//                viewOfLayout.line_graph.viewport.setMaxX(Date().time.toDouble())
-//                viewOfLayout.line_graph.viewport.isXAxisBoundsManual = true
-
+                viewOfLayout.line_graph.gridLabelRenderer.numVerticalLabels = 3
 
 
                 var percentComplete = (completed / total * 100).toInt()
@@ -151,9 +156,6 @@ class ProfileFragment : Fragment() {
 
                 if ( percentComplete == 0 ) percentComplete = 1
                 viewOfLayout.circle_progress_bar.setProgress(percentComplete, true)
-
-//                Log.d("profilef", "${total} ${completed}")
-//                Log.d("profilef", "${completed / total * 100}")
             }
             else {
                 viewOfLayout.progress_value_text.text = "0%"
