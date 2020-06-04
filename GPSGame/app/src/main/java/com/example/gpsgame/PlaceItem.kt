@@ -1,7 +1,6 @@
-package com.example.navigationgame
+package com.example.gpsgame
 
 import com.google.android.gms.maps.model.Circle
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
 import java.util.*
 

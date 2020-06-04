@@ -6,8 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.navigationgame.PlaceItem
-import java.security.AccessControlContext
 
 class PlaceRecyclerAdapter(private val context: Context, private val placeItems: List<PlaceItem> ):
     RecyclerView.Adapter<PlaceRecyclerAdapter.ViewHolder>() {
