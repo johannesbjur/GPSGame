@@ -49,7 +49,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
         // 3
         private const val REQUEST_CHECK_SETTINGS = 2
-
     }
 
     override fun onCreateView(
@@ -86,16 +85,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                         item.longitude,
                         distance )
 
-//                    Log.d("loccallback: ", distance[0].toString())
-//                    Log.d("loccallback: ", item.id)
-
                     if ( distance[0] <= item.radius ) {
 
                         item.complete()
                         placeItems.remove(item)
-
-//                        Log.d("loccallback", "In circle")
-//                        Log.d("loccallback", item.id)
 
                         db.collection("users")
                             .document(auth.currentUser?.uid.toString())
@@ -134,7 +127,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
             googleMap = it
         }
 
-        map.getUiSettings().setZoomControlsEnabled(false)
+        map.uiSettings.isZoomControlsEnabled = false
         map.setOnMarkerClickListener(this)
 
         setUpMap()
@@ -161,19 +154,13 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                 val currentLatLng = LatLng(location.latitude, location.longitude)
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
 
-
-//              Add map tilt
-//                val cameraPosition: CameraPosition =
-//                    CameraPosition.Builder().target(currentLatLng).tilt(30F).zoom(15F).bearing(0F).build()
-//                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-
-                var docRef = db.collection("users")
+                val docRef = db.collection("users")
                                                 .document(auth.currentUser?.uid.toString())
                                                 .collection("placeItems")
 
 
-//                get place items from db and add circles
-//                doesnt change on remove
+//                Get place items from db and add circles
+//                doesn't change on remove
                 docRef.addSnapshotListener { querySnapshot, e ->
 
                     if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
@@ -186,7 +173,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
                             if ( doc["active"] as Boolean && !(doc["completed"] as Boolean) ) {
 
-                                var item = PlaceItem(
+                                val item = PlaceItem(
                                     doc["name"].toString(),
                                     doc["latitude"] as Double,
                                     doc["longitude"] as Double,
@@ -206,6 +193,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
                             }
 
                         }
+                        activity.redrawList()
                     }
 
                 }
@@ -282,7 +270,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     }
 
     // 3
-    public override fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (!locationUpdateState) {
             startLocationUpdates()
@@ -290,6 +278,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     }
 
 
+    fun focusMap( lat: Double, long: Double ) {
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, long), 15f))
+    }
 
 
 }

@@ -14,9 +14,13 @@ class PlaceRecyclerAdapter(private val context: Context, private val placeItems:
 
     private val layoutInflater = LayoutInflater.from(context)
 
+    private lateinit var activity: MainActivity
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-       val itemView = layoutInflater.inflate(R.layout.list_item, parent, false )
+        val itemView = layoutInflater.inflate(R.layout.list_item, parent, false )
+
+        activity = context as MainActivity
 
         return ViewHolder(itemView)
     }
@@ -29,6 +33,12 @@ class PlaceRecyclerAdapter(private val context: Context, private val placeItems:
         val item = placeItems[position]
 
         holder.textViewTitle.text = item.name
+
+        holder.itemView.setOnClickListener {
+
+            activity.goFocusMap(item.latitude, item.longitude)
+        }
+
     }
 
 

@@ -1,19 +1,24 @@
 package com.example.gpsgame
 
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jjoe64.graphview.helper.StaticLabelsFormatter
+import com.jjoe64.graphview.series.BarGraphSeries
+import com.jjoe64.graphview.series.DataPoint
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
-import kotlinx.android.synthetic.main.fragment_profile.view.user_full_name
-import java.util.*
+import org.joda.time.DateTime
+
 
 
 class ProfileFragment : Fragment() {
@@ -23,6 +28,9 @@ class ProfileFragment : Fragment() {
 
     private lateinit var viewOfLayout: View
     private lateinit var activity: MainActivity
+
+
+    private val graphGetDaysBack = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,9 +54,11 @@ class ProfileFragment : Fragment() {
 
 //      Get user name from db and set name text to user name or Guest
         db.collection( "users" )
-            .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
+            .document( auth.currentUser?.uid.toString() ).addSnapshotListener { querySnapshot, e ->
 
-                user_full_name.text = ( result.data?.get("name") ?: "Guest" ) as String
+                if (querySnapshot != null) {
+                    user_full_name.text = ( querySnapshot.data?.get("name") ?: "Guest" ) as String
+                }
             }
 
         val docRef = db.collection("users")
@@ -56,48 +66,97 @@ class ProfileFragment : Fragment() {
             .collection("placeItems")
 
 //        Fade in text view?
-        docRef.whereEqualTo( "completed", true ).get().addOnSuccessListener { result ->
+        docRef.whereEqualTo( "completed", true ).addSnapshotListener { querySnapshot, e ->
 
+            if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 //            TODO Add more "ranks"
-            when( result.documents.size ) {
-                in 0..10    -> viewOfLayout.user_rank_text.text = "Beginner"
-                in 10..20   -> viewOfLayout.user_rank_text.text = "Novice"
-            }
+                when (querySnapshot.documents.size) {
+                    in 0..10 -> viewOfLayout.user_rank_text.text = getString(R.string.rank_beginner)
+                    in 10..20 -> viewOfLayout.user_rank_text.text = getString(R.string.rank_novice)
+                }
 
-            viewOfLayout.stars_value.text = result.documents.size.toString()
+                viewOfLayout.stars_value.text = querySnapshot.documents.size.toString()
 
 //            TODO Add medal calc value
-            viewOfLayout.medal_value.text = "3"
+                viewOfLayout.medal_value.text = "3"
+            }
         }
 
-        val date = Date(Date().time - 86400000 * 7)
+//        val date = Date(Date().time - 86400000 * 7)
+        val getFrom = DateTime.now().minusDays(graphGetDaysBack).withHourOfDay(0).withMinuteOfHour(0)
 
-        Log.d("profilef", date.toString())
+        docRef.whereGreaterThanOrEqualTo("created", getFrom.toDate()).addSnapshotListener { querySnapshot, e ->
 
-        docRef.whereGreaterThanOrEqualTo("created", date).get().addOnSuccessListener { result ->
+            if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 
-            Log.d("profilef", result.documents.size.toString())
-
-            if ( result.documents.size > 0 ) {
-
-                val total = result.documents.size.toFloat()
+                val total = querySnapshot.documents.size.toFloat()
 
                 var completed = 0.0F
 
-                for (document in result.documents) {
+                val map = mutableMapOf<String, Int>()
+                val dateStrings = mutableListOf<String>()
 
-                    if ( document["completed"] as Boolean ) completed++
+//                Create date set map
+//                TODO Clean this loop
+                for (document in querySnapshot.documents) {
+
+                    val itemDate = DateTime((document["created"] as Timestamp).toDate())
+                    val dateString = itemDate.monthOfYear().get().toString() +
+                                            "-" + itemDate.dayOfMonth().get().toString()
+
+                    if ( map[dateString] == null ){
+                        map[dateString] = 0
+                        dateStrings.add(dateString)
+                    }
+                    if ( document["completed"] as Boolean ){
+                        map[dateString] = map[dateString]!! + 1
+                        completed++
+                    }
                 }
+
+                Log.d("profilef", map.toString())
+                Log.d("profilef", map.size.toString())
+
+
+                val series = BarGraphSeries<DataPoint>()
+
+                var i = 0
+                for ( (_, value) in map ) {
+
+                    val dp = DataPoint( i.toDouble(), value.toDouble() )
+                    series.appendData( dp, true, graphGetDaysBack )
+                    i++
+                }
+
+
+
+                series.color = Color.parseColor("#FF9900")
+                series.spacing = 50
+//                viewOfLayout.line_graph.getGridLabelRenderer().setHorizontalLabelsAngle(135)
+
+                viewOfLayout.bar_graph.removeAllSeries()
+                viewOfLayout.bar_graph.addSeries(series)
+
+
+                val staticLabelsFormatter = StaticLabelsFormatter(viewOfLayout.bar_graph)
+                staticLabelsFormatter.setHorizontalLabels(
+                    dateStrings.toTypedArray()
+                )
+                viewOfLayout.bar_graph.gridLabelRenderer.labelFormatter = staticLabelsFormatter
+                viewOfLayout.bar_graph.gridLabelRenderer.gridColor = 80000000
+
+                viewOfLayout.bar_graph.viewport.setMinY(0.0)
+                viewOfLayout.bar_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
+                viewOfLayout.bar_graph.viewport.isYAxisBoundsManual = true
+                viewOfLayout.bar_graph.gridLabelRenderer.numVerticalLabels = 3
+
 
                 var percentComplete = (completed / total * 100).toInt()
 
-                viewOfLayout.progress_value_text.text = percentComplete.toString() + "%"
+                viewOfLayout.progress_value_text.text = "$percentComplete%"
 
                 if ( percentComplete == 0 ) percentComplete = 1
                 viewOfLayout.circle_progress_bar.setProgress(percentComplete, true)
-
-                Log.d("profilef", "${total} ${completed}")
-                Log.d("profilef", "${completed / total * 100}")
             }
             else {
                 viewOfLayout.progress_value_text.text = "0%"

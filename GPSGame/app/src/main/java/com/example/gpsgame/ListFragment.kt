@@ -38,4 +38,10 @@ class ListFragment : Fragment() {
         return viewOfLayout
     }
 
+    fun resetAdapter() {
+
+        val adapter = this.context?.let { PlaceRecyclerAdapter(it, activity.placeItems ) }
+        viewOfLayout.recyclerView.adapter = adapter
+    }
+
 }
