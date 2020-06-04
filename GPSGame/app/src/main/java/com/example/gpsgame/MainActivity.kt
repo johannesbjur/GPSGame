@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     private val fragmentManager  = supportFragmentManager
 
 
-    val dailyItemsAmount = 2
+    val dailyItemsAmount = 4
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
