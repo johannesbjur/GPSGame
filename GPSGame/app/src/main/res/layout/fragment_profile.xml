@@ -211,7 +211,7 @@
             app:layout_constraintTop_toBottomOf="@+id/user_full_name" />
 
         <com.jjoe64.graphview.GraphView
-            android:id="@+id/line_graph"
+            android:id="@+id/bar_graph"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginStart="16dp"

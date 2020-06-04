@@ -1,10 +1,13 @@
 package com.example.gpsgame
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -25,12 +28,12 @@ class MainActivity : AppCompatActivity() {
 
     var placeItems = mutableListOf<PlaceItem>()
 
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
 
-    lateinit var navController: NavController
+    private lateinit var navController: NavController
 
     var userFullName = ""
 
@@ -71,13 +74,22 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        val currentUser = auth.currentUser
-
         auth.signInAnonymously()
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
 
+
+
 //                    Get user location and create place items with location
+                    if (ActivityCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED ) {
+                        return@addOnCompleteListener
+                    }
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
 
                         setupActive( location )

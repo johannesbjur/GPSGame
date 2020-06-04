@@ -7,8 +7,10 @@
 
     <string name="list_active_title">Active</string>
 
+    <string name="rank_beginner">Beginner</string>
+    <string name="rank_novice">Novice</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

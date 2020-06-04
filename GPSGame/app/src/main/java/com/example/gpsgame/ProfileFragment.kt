@@ -71,8 +71,8 @@ class ProfileFragment : Fragment() {
             if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 //            TODO Add more "ranks"
                 when (querySnapshot.documents.size) {
-                    in 0..10 -> viewOfLayout.user_rank_text.text = "Beginner"
-                    in 10..20 -> viewOfLayout.user_rank_text.text = "Novice"
+                    in 0..10 -> viewOfLayout.user_rank_text.text = getString(R.string.rank_beginner)
+                    in 10..20 -> viewOfLayout.user_rank_text.text = getString(R.string.rank_novice)
                 }
 
                 viewOfLayout.stars_value.text = querySnapshot.documents.size.toString()
@@ -86,7 +86,6 @@ class ProfileFragment : Fragment() {
         val getFrom = DateTime.now().minusDays(graphGetDaysBack).withHourOfDay(0).withMinuteOfHour(0)
 
         docRef.whereGreaterThanOrEqualTo("created", getFrom.toDate()).addSnapshotListener { querySnapshot, e ->
-
 
             if ( querySnapshot != null && querySnapshot.documents.size > 0 ) {
 
@@ -122,37 +121,39 @@ class ProfileFragment : Fragment() {
                 val series = BarGraphSeries<DataPoint>()
 
                 var i = 0
-                for ( (index, value) in map ) {
+                for ( (_, value) in map ) {
 
                     val dp = DataPoint( i.toDouble(), value.toDouble() )
                     series.appendData( dp, true, graphGetDaysBack )
                     i++
                 }
 
+
+
                 series.color = Color.parseColor("#FF9900")
                 series.spacing = 50
 //                viewOfLayout.line_graph.getGridLabelRenderer().setHorizontalLabelsAngle(135)
 
-                viewOfLayout.line_graph.removeAllSeries()
-                viewOfLayout.line_graph.addSeries(series)
+                viewOfLayout.bar_graph.removeAllSeries()
+                viewOfLayout.bar_graph.addSeries(series)
 
 
-                val staticLabelsFormatter = StaticLabelsFormatter(viewOfLayout.line_graph)
+                val staticLabelsFormatter = StaticLabelsFormatter(viewOfLayout.bar_graph)
                 staticLabelsFormatter.setHorizontalLabels(
                     dateStrings.toTypedArray()
                 )
-                viewOfLayout.line_graph.gridLabelRenderer.labelFormatter = staticLabelsFormatter
-                viewOfLayout.line_graph.gridLabelRenderer.gridColor = 80000000
+                viewOfLayout.bar_graph.gridLabelRenderer.labelFormatter = staticLabelsFormatter
+                viewOfLayout.bar_graph.gridLabelRenderer.gridColor = 80000000
 
-                viewOfLayout.line_graph.viewport.setMinY(0.0)
-                viewOfLayout.line_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
-                viewOfLayout.line_graph.viewport.isYAxisBoundsManual = true
-                viewOfLayout.line_graph.gridLabelRenderer.numVerticalLabels = 3
+                viewOfLayout.bar_graph.viewport.setMinY(0.0)
+                viewOfLayout.bar_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
+                viewOfLayout.bar_graph.viewport.isYAxisBoundsManual = true
+                viewOfLayout.bar_graph.gridLabelRenderer.numVerticalLabels = 3
 
 
                 var percentComplete = (completed / total * 100).toInt()
 
-                viewOfLayout.progress_value_text.text = percentComplete.toString() + "%"
+                viewOfLayout.progress_value_text.text = "$percentComplete%"
 
                 if ( percentComplete == 0 ) percentComplete = 1
                 viewOfLayout.circle_progress_bar.setProgress(percentComplete, true)
