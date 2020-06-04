@@ -34,8 +34,17 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
+        val data: MutableMap<String, Any> = HashMap()
+
         viewOfLayout = inflater.inflate(R.layout.fragment_settings, container, false)
         viewOfLayout.settingsBackBtn?.setOnClickListener {
+
+            data["name"] = viewOfLayout.usernameInput.text.toString().capitalize(Locale.ROOT)
+            data["email"] = viewOfLayout.emailInput.text.toString()
+            data["phone"] = viewOfLayout.emailInput.text.toString()
+            db.collection( "users" )
+                .document( auth.currentUser?.uid.toString() )
+                .update( data )
 
             activity.goToProfile()
         }
@@ -45,52 +54,10 @@ class SettingsFragment : Fragment() {
 
         docRef.get().addOnSuccessListener { result ->
 
-            if ( result.get("name") != null )   viewOfLayout.usernameInput.hint = result.get("name").toString()
-            if ( result.get("email") != null )  viewOfLayout.emailInput.hint = result.get("email").toString()
-            if ( result.get("phone") != null )  viewOfLayout.phoneInput.hint = result.get("phone").toString()
+            if ( result.get("name") != null && result.get("name") != "" )   viewOfLayout.usernameInput.hint = result.get("name").toString()
+            if ( result.get("email") != null && result.get("email") != "" ) viewOfLayout.emailInput.hint = result.get("email").toString()
+            if ( result.get("phone") != null && result.get("phone") != "" ) viewOfLayout.phoneInput.hint = result.get("phone").toString()
         }
-
-        val data: MutableMap<String, Any> = HashMap()
-
-//        TODO Change to send on back button??
-        viewOfLayout.usernameInput.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-
-                data["name"] = viewOfLayout.usernameInput.text.toString().capitalize(Locale.ROOT)
-                db.collection( "users" )
-                    .document( auth.currentUser?.uid.toString() )
-                    .update( data )
-
-                return@OnKeyListener true
-            }
-            false
-        })
-        viewOfLayout.emailInput.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-
-                data["email"] = viewOfLayout.emailInput.text.toString()
-                db.collection( "users" )
-                    .document( auth.currentUser?.uid.toString() )
-                    .update( data )
-
-                return@OnKeyListener true
-            }
-            false
-        })
-        viewOfLayout.phoneInput.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-
-
-                data["phone"] = viewOfLayout.emailInput.text.toString()
-                db.collection( "users" )
-                    .document( auth.currentUser?.uid.toString() )
-                    .update( data )
-
-                return@OnKeyListener true
-            }
-            false
-        })
-
 
         return viewOfLayout
     }

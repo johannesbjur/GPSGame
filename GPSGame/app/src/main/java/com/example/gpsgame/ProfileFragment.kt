@@ -57,7 +57,12 @@ class ProfileFragment : Fragment() {
             .document( auth.currentUser?.uid.toString() ).addSnapshotListener { querySnapshot, e ->
 
                 if (querySnapshot != null) {
-                    user_full_name.text = ( querySnapshot.data?.get("name") ?: "Guest" ) as String
+                    user_full_name.text = if (querySnapshot.data?.get("name") != null && querySnapshot.data?.get("name").toString() != "") {
+                        querySnapshot.data?.get("name").toString()
+                    }
+                    else {
+                        "Guest"
+                    }
                 }
             }
 
@@ -137,18 +142,22 @@ class ProfileFragment : Fragment() {
                 viewOfLayout.bar_graph.removeAllSeries()
                 viewOfLayout.bar_graph.addSeries(series)
 
-
-                val staticLabelsFormatter = StaticLabelsFormatter(viewOfLayout.bar_graph)
-                staticLabelsFormatter.setHorizontalLabels(
-                    dateStrings.toTypedArray()
-                )
-                viewOfLayout.bar_graph.gridLabelRenderer.labelFormatter = staticLabelsFormatter
                 viewOfLayout.bar_graph.gridLabelRenderer.gridColor = 80000000
 
-                viewOfLayout.bar_graph.viewport.setMinY(0.0)
-                viewOfLayout.bar_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
-                viewOfLayout.bar_graph.viewport.isYAxisBoundsManual = true
-                viewOfLayout.bar_graph.gridLabelRenderer.numVerticalLabels = 3
+                if ( dateStrings.size > 1 ) {
+
+                    val staticLabelsFormatter = StaticLabelsFormatter(viewOfLayout.bar_graph)
+                    staticLabelsFormatter.setHorizontalLabels(
+                        dateStrings.toTypedArray()
+                    )
+                    viewOfLayout.bar_graph.gridLabelRenderer.labelFormatter = staticLabelsFormatter
+
+                    viewOfLayout.bar_graph.viewport.setMinY(0.0)
+                    viewOfLayout.bar_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
+                    viewOfLayout.bar_graph.viewport.isYAxisBoundsManual = true
+                    viewOfLayout.bar_graph.gridLabelRenderer.numVerticalLabels = 3
+                }
+//                    TODO else hide graph
 
 
                 var percentComplete = (completed / total * 100).toInt()

@@ -127,6 +127,19 @@ class MainActivity : AppCompatActivity() {
             .document(auth.currentUser?.uid.toString())
             .collection("placeItems")
 
+        val userField: MutableMap<String, Any> = HashMap()
+        db.collection( "users" )
+            .document( auth.currentUser?.uid.toString() ).get().addOnSuccessListener { result ->
+                if (result != null && result.data?.get("name") == null) {
+
+                    userField["name"] = ""
+                    db.collection( "users" )
+                        .document( auth.currentUser?.uid.toString() ).set(userField)
+
+                }
+            }
+
+
         val yesterday = DateTime.now().minusDays(1).toDate()
 
         docRef.whereGreaterThanOrEqualTo("created", yesterday).get().addOnSuccessListener { resultToday ->
