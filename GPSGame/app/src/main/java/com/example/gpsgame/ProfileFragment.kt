@@ -156,6 +156,8 @@ class ProfileFragment : Fragment() {
                     viewOfLayout.bar_graph.viewport.setMaxY(activity.dailyItemsAmount.toDouble())
                     viewOfLayout.bar_graph.viewport.isYAxisBoundsManual = true
                     viewOfLayout.bar_graph.gridLabelRenderer.numVerticalLabels = 3
+                    viewOfLayout.bar_graph.gridLabelRenderer.isVerticalLabelsVisible = true
+                    viewOfLayout.bar_graph.gridLabelRenderer.isHorizontalLabelsVisible = true
                 }
                 else {
                     viewOfLayout.bar_graph.removeAllSeries()
