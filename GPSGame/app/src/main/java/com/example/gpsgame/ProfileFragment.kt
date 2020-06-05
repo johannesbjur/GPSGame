@@ -157,8 +157,11 @@ class ProfileFragment : Fragment() {
                     viewOfLayout.bar_graph.viewport.isYAxisBoundsManual = true
                     viewOfLayout.bar_graph.gridLabelRenderer.numVerticalLabels = 3
                 }
-//                    TODO else hide graph
-
+                else {
+                    viewOfLayout.bar_graph.removeAllSeries()
+                    viewOfLayout.bar_graph.gridLabelRenderer.isVerticalLabelsVisible = false
+                    viewOfLayout.bar_graph.gridLabelRenderer.isHorizontalLabelsVisible = false
+                }
 
                 var percentComplete = (completed / total * 100).toInt()
 
