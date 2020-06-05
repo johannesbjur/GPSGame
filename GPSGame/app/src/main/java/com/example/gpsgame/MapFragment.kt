@@ -73,30 +73,34 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
 
                 Log.d("loccallback", lastLocation.latitude.toString() + " " + lastLocation.longitude.toString())
 
-                val distance = FloatArray(2)
+                if ( placeItems.size > 0 ) {
 
-                for( item in placeItems ) {
+                    val itemsCopy = placeItems.toMutableList()
+                    val distance = FloatArray(2)
 
-                    Location.distanceBetween(
-                        lastLocation.latitude,
-                        lastLocation.longitude,
-                        item.latitude,
-                        item.longitude,
-                        distance )
+                    for( item in itemsCopy ) {
 
-                    if ( distance[0] <= item.radius ) {
+                        Location.distanceBetween(
+                            lastLocation.latitude,
+                            lastLocation.longitude,
+                            item.latitude,
+                            item.longitude,
+                            distance )
 
-                        item.complete()
-                        placeItems.remove(item)
+                        if ( distance[0] <= item.radius ) {
 
-                        db.collection("users")
-                            .document(auth.currentUser?.uid.toString())
-                            .collection("placeItems")
-                            .document(item.id)
-                            .set(item)
-                    }
-                    else {
-                        Log.d("loccallback", "Not in circle")
+                            item.complete()
+                            placeItems.remove(item)
+
+                            db.collection("users")
+                                .document(auth.currentUser?.uid.toString())
+                                .collection("placeItems")
+                                .document(item.id)
+                                .set(item)
+                        }
+                        else {
+                            Log.d("loccallback", "Not in circle")
+                        }
                     }
                 }
             }
